@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+assets/frames/*
+!assets/frames/.gitkeep
+assets/outputs/*
+!assets/outputs/.gitkeep
+assets/depth/*
+!assets/depth/.gitkeep
+assets/logos/*
+!assets/logos/.gitkeep
+final_renders/*
+!final_renders/.gitkeep
+.final_renders

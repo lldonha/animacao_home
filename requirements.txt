@@ -1,0 +1,12 @@
+fastapi==0.115.5
+uvicorn[standard]==0.30.6
+pydantic==2.9.2
+python-dotenv==1.0.1
+pyyaml==6.0.2
+requests==2.32.3
+loguru==0.7.2
+opencv-python==4.10.0.84
+numpy==2.1.2
+ffmpeg-python==0.2.0
+python-slugify==8.0.4
+tenacity==9.0.0
