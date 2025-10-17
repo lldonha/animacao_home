@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  api:
+    build: .
+    image: ai_character_animator:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+    env_file:
+      - .env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ["gpu"]

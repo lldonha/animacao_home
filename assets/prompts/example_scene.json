@@ -1,0 +1,28 @@
+{
+  "scene_id": "caminhinho_intro_v1",
+  "prompt_base": "caminhinho cartoon character walking under golden light, soft shadows, cinematic depth of field",
+  "camera": "slow zoom in, handheld",
+  "motion_type": "loop",
+  "duration": 8,
+  "effects": ["bloom", "film_grain", "vignette"],
+  "takes": [
+    {
+      "take_id": "intro_zoom",
+      "prompt_override": "medium shot of caminhinho smiling, sunbeams through trees",
+      "duration": 4,
+      "motion_type": "loop"
+    },
+    {
+      "take_id": "closeup_glow",
+      "prompt_override": "close-up caminhinho looking determined, soft glow",
+      "duration": 2,
+      "motion_type": "take"
+    },
+    {
+      "take_id": "wide_back",
+      "prompt_override": "wide shot caminhinho walking away on path, backlit",
+      "duration": 2,
+      "motion_type": "take"
+    }
+  ]
+}

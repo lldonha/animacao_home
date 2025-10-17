@@ -1,0 +1,27 @@
+render:
+  fps: 30
+  resolution:
+    width: 1080
+    height: 1920
+  crf: 20
+  pix_fmt: yuv420p
+  format: mp4
+  postprocess:
+    color_grade: true
+    motion_blur: true
+    glow: true
+    film_grain: true
+    vignette: true
+    depth_pass: true
+    glitch: false
+paths:
+  frames: assets/frames
+  outputs: assets/outputs
+  final_renders: final_renders
+  prompts: assets/prompts
+  logos: assets/logos
+  depth: assets/depth
+comfyui:
+  host: http://localhost:8188
+  workflow: configs/default_workflow.json
+  default_model: sdxl_custom_character
