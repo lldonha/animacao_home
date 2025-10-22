@@ -1,0 +1,230 @@
+{
+  "name": "Fiza - Cosmic Animator (Main)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fiza-animate",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook - Start Animation",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "fiza-animate-webhook"
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:8000/api/animate",
+        "method": "POST",
+        "sendBody": true,
+        "bodyContentType": "json",
+        "body": "={{ $json }}",
+        "options": {}
+      },
+      "id": "create-animation-job",
+      "name": "Create Animation Job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "seconds"
+      },
+      "id": "wait-initial",
+      "name": "Wait Initial",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "url": "=http://localhost:8000/api/status/{{ $json.job_id }}",
+        "method": "GET",
+        "options": {}
+      },
+      "id": "check-status",
+      "name": "Check Job Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [910, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "completed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "completed"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "failed"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "processing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "processing"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-status",
+      "name": "Switch Status",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      },
+      "id": "wait-loop",
+      "name": "Wait Loop",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [910, 500]
+    },
+    {
+      "parameters": {
+        "content": "## ✅ Animação Completa!\n\n**Job ID:** {{ $json.job_id }}\n\n**Vídeos gerados:**\n- 9:16 (Short): {{ $json.results['9:16'] }}\n- 16:9 (Video): {{ $json.results['16:9'] }}\n\n**Progresso:** {{ $json.progress }}%\n**Mensagem:** {{ $json.message }}",
+        "height": 464,
+        "width": 527
+      },
+      "id": "sticky-success",
+      "name": "Success Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1350, 100]
+    },
+    {
+      "parameters": {
+        "content": "## ❌ Erro na Animação\n\n**Job ID:** {{ $json.job_id }}\n**Erro:** {{ $json.error }}\n**Status:** {{ $json.status }}",
+        "height": 267,
+        "width": 368
+      },
+      "id": "sticky-error",
+      "name": "Error Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1350, 400]
+    },
+    {
+      "parameters": {
+        "operation": "sendNotification",
+        "title": "Fiza Animation Complete!",
+        "message": "Job {{ $json.job_id }} completed successfully.\n\nVideos:\n- 9:16: {{ $json.results['9:16'] }}\n- 16:9: {{ $json.results['16:9'] }}"
+      },
+      "id": "notification-success",
+      "name": "Notify Success",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 1,
+      "position": [1570, 200],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "sendNotification",
+        "title": "Fiza Animation Failed",
+        "message": "Job {{ $json.job_id }} failed.\n\nError: {{ $json.error }}"
+      },
+      "id": "notification-error",
+      "name": "Notify Error",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 1,
+      "position": [1570, 450],
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Webhook - Start Animation": {
+      "main": [[{ "node": "Create Animation Job", "type": "main", "index": 0 }]]
+    },
+    "Create Animation Job": {
+      "main": [[{ "node": "Wait Initial", "type": "main", "index": 0 }]]
+    },
+    "Wait Initial": {
+      "main": [[{ "node": "Check Job Status", "type": "main", "index": 0 }]]
+    },
+    "Check Job Status": {
+      "main": [[{ "node": "Switch Status", "type": "main", "index": 0 }]]
+    },
+    "Switch Status": {
+      "main": [
+        [{ "node": "Notify Success", "type": "main", "index": 0 }],
+        [{ "node": "Notify Error", "type": "main", "index": 0 }],
+        [{ "node": "Wait Loop", "type": "main", "index": 0 }]
+      ]
+    },
+    "Wait Loop": {
+      "main": [[{ "node": "Check Job Status", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1"
+}

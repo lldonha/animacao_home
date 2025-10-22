@@ -1,0 +1,135 @@
+{
+  "name": "Fiza - Cosmic Animator (Scheduler)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "list",
+        "path": "/home/user/animacao_home/assets/input",
+        "options": {
+          "fileExtensions": "jpg,jpeg,png"
+        }
+      },
+      "id": "list-files",
+      "name": "List Input Images",
+      "type": "n8n-nodes-base.filesReadDirectory",
+      "typeVersion": 1,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.files.length }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-files",
+      "name": "Has Files?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const files = $input.first().json.files;\nconst imagePaths = files.map(f => f.path);\n\nreturn [{\n  json: {\n    image_paths: imagePaths,\n    output_dir: \"assets/output/scheduled\",\n    config_overrides: {\n      animation: {\n        effects: {\n          particles: {\n            enabled: true,\n            count: 300\n          }\n        }\n      }\n    }\n  }\n}];"
+      },
+      "id": "prepare-batch",
+      "name": "Prepare Batch Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [910, 200]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:8000/api/batch",
+        "method": "POST",
+        "sendBody": true,
+        "bodyContentType": "json",
+        "body": "={{ $json }}",
+        "options": {}
+      },
+      "id": "trigger-batch",
+      "name": "Trigger Batch Animation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1130, 200]
+    },
+    {
+      "parameters": {
+        "content": "## 🕐 Agendamento Automático\n\nEste workflow executa automaticamente todos os dias às 9h.\n\nProcessa todas as imagens na pasta assets/input.\n\nÚtil para processar novos uploads automaticamente."
+      },
+      "id": "sticky-scheduler",
+      "name": "Scheduler Info",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, 100]
+    },
+    {
+      "parameters": {
+        "content": "## ⚙️ Configurar\n\n1. Ajuste o horário no nó \"Schedule Trigger\"\n2. Modifique o caminho da pasta em \"List Input Images\"\n3. Personalize efeitos em \"Prepare Batch Request\"\n4. Ative notificações se desejar"
+      },
+      "id": "sticky-config",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, 450]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [[{ "node": "List Input Images", "type": "main", "index": 0 }]]
+    },
+    "List Input Images": {
+      "main": [[{ "node": "Has Files?", "type": "main", "index": 0 }]]
+    },
+    "Has Files?": {
+      "main": [
+        [{ "node": "Prepare Batch Request", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Prepare Batch Request": {
+      "main": [[{ "node": "Trigger Batch Animation", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1"
+}

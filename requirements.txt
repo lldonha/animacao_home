@@ -1,0 +1,36 @@
+# Core dependencies
+torch>=2.0.0
+torchvision>=0.15.0
+opencv-python>=4.8.0
+opencv-contrib-python>=4.8.0
+numpy>=1.24.0
+Pillow>=10.0.0
+moviepy>=1.0.3
+imageio>=2.31.0
+imageio-ffmpeg>=0.4.9
+
+# Google Gemini API
+google-generativeai>=0.3.0
+google-auth>=2.23.0
+
+# Image processing and effects
+scipy>=1.11.0
+scikit-image>=0.21.0
+numba>=0.58.0
+
+# Utilities
+python-dotenv>=1.0.0
+pyyaml>=6.0
+requests>=2.31.0
+tqdm>=4.66.0
+
+# CUDA acceleration (optional, requires CUDA toolkit)
+cupy-cuda12x>=12.0.0
+
+# Video codec support
+av>=10.0.0
+
+# n8n webhook integration
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.4.0

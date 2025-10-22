@@ -1,0 +1,134 @@
+project:
+  name: "Fiza - Exploradora Cósmica Animator"
+  version: "1.0.0"
+  description: "Sistema de animação de última geração com Gemini AI e CUDA"
+
+animation:
+  fps: 30
+  duration: 5  # segundos
+  frames_total: 150  # fps * duration
+
+  # Configurações de movimento
+  movement:
+    horizontal_speed: 0.05  # Velocidade de pan horizontal
+    vertical_speed: 0.03    # Velocidade de pan vertical
+    zoom_factor: 1.2        # Fator de zoom durante animação
+    smooth_factor: 0.85     # Suavização de movimento (0-1)
+
+  # Efeitos
+  effects:
+    glow:
+      enabled: true
+      intensity: 0.8
+      radius: 15
+      color: [100, 200, 255]  # RGB azul cósmico
+
+    particles:
+      enabled: true
+      count: 200
+      size_range: [2, 8]
+      speed_range: [0.5, 2.0]
+      lifetime: 60  # frames
+      colors:
+        - [255, 255, 200]  # Amarelo claro
+        - [200, 150, 255]  # Roxo
+        - [100, 200, 255]  # Azul
+
+    motion_blur:
+      enabled: true
+      strength: 0.3
+
+    depth_of_field:
+      enabled: true
+      focus_range: 0.6
+
+# Formatos de saída
+output_formats:
+  short_vertical:
+    name: "short_9_16"
+    resolution: [1080, 1920]
+    aspect_ratio: "9:16"
+    pan_direction: "horizontal"  # Esquerda para direita
+
+  video_horizontal:
+    name: "video_16_9"
+    resolution: [1920, 1080]
+    aspect_ratio: "16:9"
+    pan_direction: "vertical"  # Cima para baixo
+
+# Configurações Gemini API
+gemini:
+  model: "gemini-2.0-flash-exp"  # Modelo mais recente para imagens
+
+  # Parâmetros de geração
+  generation:
+    temperature: 0.9
+    top_p: 0.95
+    top_k: 40
+    max_output_tokens: 2048
+
+  # Prompts para geração de frames
+  prompts:
+    base: |
+      Create a cosmic-themed animation frame featuring Fiza, the cosmic explorer character.
+      Style: vibrant, cosmic, space exploration, ethereal glow effects.
+      Maintain character consistency and add subtle variations for animation.
+
+    variations:
+      - "Add gentle floating particles and stardust"
+      - "Enhance cosmic glow and ethereal lighting"
+      - "Add subtle movement to hair and clothing"
+      - "Include twinkling stars and nebula effects"
+
+  # Stop motion settings
+  stop_motion:
+    frames_between_generations: 5  # Gera nova imagem a cada N frames
+    interpolation_method: "optical_flow"  # optical_flow, morph, blend
+    blend_strength: 0.7
+
+# CUDA/GPU Settings
+cuda:
+  enabled: true
+  device_id: 0
+  memory_fraction: 0.8  # Usar 80% da VRAM disponível
+  benchmark: true  # Otimizar para performance
+  deterministic: false  # True para reprodutibilidade
+
+# Processamento
+processing:
+  batch_size: 4
+  num_workers: 4
+  prefetch_factor: 2
+
+  # Upscaling se necessário
+  upscale:
+    enabled: false
+    method: "Real-ESRGAN"  # Real-ESRGAN, waifu2x, lanczos
+    scale_factor: 2
+
+# Rendering
+rendering:
+  codec: "h264"
+  pixel_format: "yuv420p"
+  quality: "high"  # low, medium, high, ultra
+  bitrate: "8000k"
+  audio: false
+
+  # Otimizações
+  hardware_acceleration: true
+  gpu_encoding: true  # NVENC para RTX 4070
+
+# n8n Integration
+n8n:
+  enabled: true
+  webhook_base_url: "http://localhost:5678"
+
+  workflows:
+    main_animation: "/webhook/fiza-animate"
+    batch_process: "/webhook/fiza-batch"
+    status_check: "/webhook/fiza-status"
+
+  retry:
+    max_attempts: 3
+    backoff_factor: 2
+    timeout: 300  # segundos

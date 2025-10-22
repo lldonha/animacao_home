@@ -1,0 +1,191 @@
+{
+  "name": "Fiza - Cosmic Animator (Batch)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fiza-batch",
+        "options": {}
+      },
+      "id": "webhook-batch",
+      "name": "Webhook - Batch Process",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "fiza-batch-webhook"
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:8000/api/batch",
+        "method": "POST",
+        "sendBody": true,
+        "bodyContentType": "json",
+        "body": "={{ $json }}",
+        "options": {}
+      },
+      "id": "create-batch",
+      "name": "Create Batch Jobs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "job_ids",
+        "options": {}
+      },
+      "id": "split-jobs",
+      "name": "Split Job IDs",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "seconds"
+      },
+      "id": "wait-between-checks",
+      "name": "Wait Between Checks",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [910, 300]
+    },
+    {
+      "parameters": {
+        "url": "=http://localhost:8000/api/status/{{ $json }}",
+        "method": "GET",
+        "options": {}
+      },
+      "id": "check-job-status",
+      "name": "Check Each Job Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "completed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "completed"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "processing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "or"
+              },
+              "renameOutput": true,
+              "outputKey": "processing"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-batch-status",
+      "name": "Check Status",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1350, 300]
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      },
+      "id": "wait-retry",
+      "name": "Wait Before Retry",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1130, 500]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "aggregate-results",
+      "name": "Aggregate Results",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [1570, 200]
+    },
+    {
+      "parameters": {
+        "content": "## 📦 Processamento em Lote\n\nEste workflow processa múltiplas imagens em paralelo.\n\nCada job é monitorado individualmente até conclusão.\n\nResultados são agregados no final."
+      },
+      "id": "sticky-info",
+      "name": "Info",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, 100]
+    }
+  ],
+  "connections": {
+    "Webhook - Batch Process": {
+      "main": [[{ "node": "Create Batch Jobs", "type": "main", "index": 0 }]]
+    },
+    "Create Batch Jobs": {
+      "main": [[{ "node": "Split Job IDs", "type": "main", "index": 0 }]]
+    },
+    "Split Job IDs": {
+      "main": [[{ "node": "Wait Between Checks", "type": "main", "index": 0 }]]
+    },
+    "Wait Between Checks": {
+      "main": [[{ "node": "Check Each Job Status", "type": "main", "index": 0 }]]
+    },
+    "Check Each Job Status": {
+      "main": [[{ "node": "Check Status", "type": "main", "index": 0 }]]
+    },
+    "Check Status": {
+      "main": [
+        [{ "node": "Aggregate Results", "type": "main", "index": 0 }],
+        [{ "node": "Wait Before Retry", "type": "main", "index": 0 }]
+      ]
+    },
+    "Wait Before Retry": {
+      "main": [[{ "node": "Check Each Job Status", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1"
+}
