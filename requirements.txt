@@ -9,9 +9,17 @@ moviepy>=1.0.3
 imageio>=2.31.0
 imageio-ffmpeg>=0.4.9
 
-# Google Gemini API
+# Google Gemini API (opcional se usar modelos locais)
 google-generativeai>=0.3.0
 google-auth>=2.23.0
+
+# Hugging Face e Diffusers (para modelos locais)
+diffusers>=0.25.0
+transformers>=4.36.0
+accelerate>=0.25.0
+safetensors>=0.4.1
+huggingface-hub>=0.20.0
+xformers>=0.0.23  # Otimização de memória (requer GPU)
 
 # Image processing and effects
 scipy>=1.11.0

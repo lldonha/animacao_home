@@ -56,18 +56,66 @@ output_formats:
     aspect_ratio: "16:9"
     pan_direction: "vertical"  # Cima para baixo
 
-# Configurações Gemini API
-gemini:
-  model: "gemini-2.0-flash-exp"  # Modelo mais recente para imagens
+# Modelos Locais Hugging Face (RECOMENDADO)
+local_models:
+  enabled: true  # Usar modelos locais ao invés de API
+  models_dir: "models"  # Diretório dos modelos
 
-  # Parâmetros de geração
+  # Modelo principal para geração de frames
+  generator:
+    model_name: null  # null = auto-detect, ou especifique o nome
+    method: "img2img"  # img2img, controlnet, animatediff
+    use_controlnet: true  # Usar ControlNet para consistência
+    controlnet_type: "canny"  # canny, depth, tile
+
+  # Configurações de geração
+  generation:
+    strength: 0.3  # Força da transformação img2img (0-1)
+    guidance_scale: 7.5
+    num_inference_steps: 30
+    scheduler: "DPMSolver"  # DDIM, DPMSolver, Euler
+
+  # Interpolação de frames
+  interpolation:
+    method: "rife"  # rife, film, optical_flow
+    model_path: "models/interpolation/rife_v4.6.pkl"
+
+  # Prompts para geração local
+  prompts:
+    base: |
+      cosmic scene, space explorer character Fiza, ethereal glow, vibrant colors,
+      stars, nebula, professional digital art, highly detailed, 8k quality
+
+    negative: |
+      blurry, low quality, distorted, deformed, ugly, bad anatomy, watermark,
+      signature, text, extra limbs
+
+    variations:
+      - "subtle floating particles, cosmic dust"
+      - "enhanced ethereal glow, soft lighting"
+      - "gentle hair and cloth movement"
+      - "twinkling stars, nebula background"
+      - "cosmic energy aura, glowing effects"
+      - "space environment, floating debris"
+
+  # AnimateDiff settings (se usar)
+  animatediff:
+    enabled: false
+    motion_module: "guoyww/animatediff-motion-adapter-v1-5-2"
+    num_frames: 16  # Múltiplo de 8
+    guidance_scale: 7.5
+
+# Configurações Gemini API (Fallback)
+gemini:
+  enabled: false  # Desabilitado se local_models.enabled = true
+  model: "gemini-2.0-flash-exp"
+
   generation:
     temperature: 0.9
     top_p: 0.95
     top_k: 40
     max_output_tokens: 2048
 
-  # Prompts para geração de frames
   prompts:
     base: |
       Create a cosmic-themed animation frame featuring Fiza, the cosmic explorer character.
@@ -80,10 +128,9 @@ gemini:
       - "Add subtle movement to hair and clothing"
       - "Include twinkling stars and nebula effects"
 
-  # Stop motion settings
   stop_motion:
-    frames_between_generations: 5  # Gera nova imagem a cada N frames
-    interpolation_method: "optical_flow"  # optical_flow, morph, blend
+    frames_between_generations: 5
+    interpolation_method: "optical_flow"
     blend_strength: 0.7
 
 # CUDA/GPU Settings
